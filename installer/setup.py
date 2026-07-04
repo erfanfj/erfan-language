@@ -9,6 +9,7 @@ import winreg
 
 APP_NAME = "Erfan"
 EXE_NAME = "erfan.exe"
+RUNTIME_NAME = "erfan_runtime.exe"
 
 # ---------------- THEME ---------------- #
 BG_DARK = "#151521"
@@ -51,6 +52,11 @@ def copy_exe(progress_cb=None):
         raise FileNotFoundError(f"{EXE_NAME} not found inside the installer")
 
     shutil.copy2(source, target)
+
+    runtime_source = resource_path(RUNTIME_NAME)
+    if os.path.exists(runtime_source):
+        shutil.copy2(runtime_source, os.path.join(app_dir, RUNTIME_NAME))
+
     return app_dir
 
 

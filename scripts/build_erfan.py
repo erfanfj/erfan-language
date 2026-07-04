@@ -80,7 +80,9 @@ def build_installer():
         build_erfan_exe()
 
     staged_erfan = os.path.join(INSTALLER_DIST, "erfan.exe")
+    staged_runtime = os.path.join(INSTALLER_DIST, "erfan_runtime.exe")
     shutil.copy2(erfan_exe, staged_erfan)
+    shutil.copy2(RUNTIME, staged_runtime)
 
     run(
         [
@@ -101,6 +103,8 @@ def build_installer():
             os.path.join(ROOT, "build", "setup_spec"),
             "--add-binary",
             f"{staged_erfan};.",
+            "--add-binary",
+            f"{staged_runtime};.",
             os.path.join(ROOT, "installer", "setup.py"),
         ]
     )
