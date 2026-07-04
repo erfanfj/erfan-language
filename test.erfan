@@ -1,11 +1,15 @@
-name <- "Erfan"
+chap(5 == 5)
+chap(5 != 4)
 
-age <- 22
+chap(5 > 2)
+chap(5 < 2)
 
-pi <- 3.14
+chap(5 >= 5)
+chap(5 <= 10)
 
-alive <- true
+chap(true && false)
+chap(true || false)
 
-nothing <- null
+chap(!false)
 
-chap(name, age, pi, alive, nothing)
+chap(-(5+3))

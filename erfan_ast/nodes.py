@@ -72,6 +72,11 @@ class BinaryOperation(ASTNode):
     operator: str
     right: ASTNode
 
+@dataclass
+class UnaryOperation(ASTNode):
+
+    operator: str
+    operand: ASTNode
 
 # ------------------------
 # Function Call

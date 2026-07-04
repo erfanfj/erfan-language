@@ -2,6 +2,31 @@ from .token import Token, TokenType
 from .keywords import KEYWORDS
 
 
+SINGLE_CHAR_TOKENS = {
+    "+": TokenType.PLUS,
+    "-": TokenType.MINUS,
+    "*": TokenType.STAR,
+    "/": TokenType.SLASH,
+
+    "(": TokenType.LPAREN,
+    ")": TokenType.RPAREN,
+    ",": TokenType.COMMA,
+
+    ">": TokenType.GT,
+    "<": TokenType.LT,
+
+    "!": TokenType.NOT,   # ← این باید وجود داشته باشد
+}
+
+DOUBLE_CHAR_TOKENS = {
+    "==": TokenType.EQ,
+    "!=": TokenType.NE,
+    ">=": TokenType.GTE,
+    "<=": TokenType.LTE,
+    "&&": TokenType.AND,
+    "||": TokenType.OR,
+}
+
 class Lexer:
 
     def __init__(self, text: str):
@@ -154,11 +179,20 @@ class Lexer:
 
         while self.current_char is not None:
 
+            # ---------------------------------------
+            # Whitespace
+            # ---------------------------------------
+
             if self.current_char in " \t\r":
                 self.skip_whitespace()
                 continue
 
+            # ---------------------------------------
+            # New Line
+            # ---------------------------------------
+
             if self.current_char == "\n":
+
                 tokens.append(
                     Token(
                         TokenType.NEWLINE,
@@ -167,134 +201,101 @@ class Lexer:
                         self.column
                     )
                 )
+
                 self.advance()
                 continue
 
-            if self.current_char.isdigit():
-                tokens.append(self.number())
-                continue
-
-            if self.current_char.isalpha() or self.current_char == "_":
-                tokens.append(self.identifier())
-                continue
-
-            if self.current_char == "<" and self.peek() == "-":
-                tokens.append(
-                    Token(
-                        TokenType.ASSIGN,
-                        "<-",
-                        self.line,
-                        self.column
-                    )
-                )
-                self.advance()
-                self.advance()
-                continue
-
-            if self.current_char == "+":
-                tokens.append(
-                    Token(
-                        TokenType.PLUS,
-                        "+",
-                        self.line,
-                        self.column
-                    )
-                )
-                self.advance()
-                continue
-
-            if self.current_char == "-":
-                tokens.append(
-                    Token(
-                        TokenType.MINUS,
-                        "-",
-                        self.line,
-                        self.column
-                    )
-                )
-                self.advance()
-                continue
-
-            if self.current_char == "*":
-                tokens.append(
-                    Token(
-                        TokenType.STAR,
-                        "*",
-                        self.line,
-                        self.column
-                    )
-                )
-                self.advance()
-                continue
+            # ---------------------------------------
+            # Comments
+            # ---------------------------------------
 
             if self.current_char == "/" and self.peek() == "/":
 
                 self.skip_comment()
-
                 continue
 
-            if self.current_char == "/":
-                tokens.append(
-                    Token(
-                        TokenType.SLASH,
-                        "/",
-                        self.line,
-                        self.column
-                    )
-                )
-                self.advance()
+            # ---------------------------------------
+            # Numbers
+            # ---------------------------------------
+
+            if self.current_char.isdigit():
+
+                tokens.append(self.number())
                 continue
+
+            # ---------------------------------------
+            # String
+            # ---------------------------------------
 
             if self.current_char == '"':
 
                 tokens.append(self.string())
-
                 continue
 
-            if self.current_char == "(":
-                tokens.append(
-                    Token(
-                        TokenType.LPAREN,
-                        "(",
-                        self.line,
-                        self.column
-                    )
-                )
-                self.advance()
+            # ---------------------------------------
+            # Identifier / Keyword
+            # ---------------------------------------
+
+            if self.current_char.isalpha() or self.current_char == "_":
+
+                tokens.append(self.identifier())
                 continue
 
-            if self.current_char == ")":
-                tokens.append(
-                    Token(
-                        TokenType.RPAREN,
-                        ")",
-                        self.line,
-                        self.column
-                    )
-                )
-                self.advance()
-                continue
+            # ---------------------------------------
+            # Two Character Operators
+            # ---------------------------------------
 
-            if self.current_char == ",":
+            two_char = self.current_char
+
+            if self.peek() is not None:
+                two_char += self.peek()
+
+            if two_char in DOUBLE_CHAR_TOKENS:
 
                 tokens.append(
-
                     Token(
-                        TokenType.COMMA,
-                        ",",
+                        DOUBLE_CHAR_TOKENS[two_char],
+                        two_char,
                         self.line,
                         self.column
                     )
                 )
 
                 self.advance()
+                self.advance()
 
                 continue
+
+            # ---------------------------------------
+            # Single Character Operators
+            # ---------------------------------------
+
+            if self.current_char in SINGLE_CHAR_TOKENS:
+
+                tokens.append(
+                    Token(
+                        SINGLE_CHAR_TOKENS[self.current_char],
+                        self.current_char,
+                        self.line,
+                        self.column
+                    )
+                )
+
+                self.advance()
+                continue
+
+            # ---------------------------------------
+            # Unknown Character
+            # ---------------------------------------
 
             raise SyntaxError(
                 f"Unknown character '{self.current_char}' "
                 f"at line {self.line}, column {self.column}"
             )
+
+        # ---------------------------------------
+        # EOF
+        # ---------------------------------------
 
         tokens.append(
             Token(

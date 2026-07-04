@@ -60,12 +60,29 @@ class Interpreter:
 
     # ----------------------------------------
 
+    def visit_UnaryOperation(self, node):
+
+        value = self.visit(node.operand)
+
+        if node.operator == "-":
+            return -value
+
+        if node.operator == "+":
+            return +value
+
+        if node.operator == "!":
+            return not bool(value)
+
+        raise RuntimeError(
+            f"Unknown unary operator {node.operator}"
+        )
+
     def visit_BinaryOperation(self, node):
 
         left = self.visit(node.left)
-
         right = self.visit(node.right)
 
+        # Arithmetic
         if node.operator == "+":
             return left + right
 
@@ -78,7 +95,33 @@ class Interpreter:
         if node.operator == "/":
             return left / right
 
-        raise Exception("Unknown operator")
+        # Comparison
+        if node.operator == "==":
+            return left == right
+
+        if node.operator == "!=":
+            return left != right
+
+        if node.operator == ">":
+            return left > right
+
+        if node.operator == "<":
+            return left < right
+
+        if node.operator == ">=":
+            return left >= right
+
+        if node.operator == "<=":
+            return left <= right
+
+        # Logical
+        if node.operator == "&&":
+            return bool(left) and bool(right)
+
+        if node.operator == "||":
+            return bool(left) or bool(right)
+
+        raise RuntimeError(f"Unknown operator {node.operator}")
 
     # ----------------------------------------
 

@@ -11,6 +11,7 @@ from erfan_ast.nodes import (
     Null,
     BinaryOperation,
     FunctionCall,
+    UnaryOperation
 )
 
 
@@ -119,8 +120,94 @@ class Parser:
     # -----------------------------------------------------
 
     def expression(self):
+        return self.logical_or()
+    
+    def logical_or(self):
 
-        node = self.term()
+        node = self.logical_and()
+
+        while self.current.type == TokenType.OR:
+
+            op = self.current.value
+
+            self.advance()
+
+            node = BinaryOperation(
+                node,
+                op,
+                self.logical_and()
+            )
+
+        return node
+
+
+    def logical_and(self):
+
+        node = self.equality()
+
+        while self.current.type == TokenType.AND:
+
+            op = self.current.value
+
+            self.advance()
+
+            node = BinaryOperation(
+                node,
+                op,
+                self.equality()
+            )
+
+        return node
+    
+    def equality(self):
+
+        node = self.comparison()
+
+        while self.current.type in (
+            TokenType.EQ,
+            TokenType.NE,
+        ):
+
+            op = self.current.value
+
+            self.advance()
+
+            node = BinaryOperation(
+                node,
+                op,
+                self.comparison()
+            )
+
+        return node
+    
+    def comparison(self):
+
+        node = self.addition()
+
+        while self.current.type in (
+
+            TokenType.GT,
+            TokenType.LT,
+            TokenType.GTE,
+            TokenType.LTE,
+
+        ):
+
+            op = self.current.value
+
+            self.advance()
+
+            node = BinaryOperation(
+                node,
+                op,
+                self.addition()
+            )
+
+        return node
+    
+    def addition(self):
+
+        node = self.multiplication()
 
         while self.current.type in (
             TokenType.PLUS,
@@ -134,16 +221,14 @@ class Parser:
             node = BinaryOperation(
                 node,
                 op,
-                self.term()
+                self.multiplication()
             )
 
         return node
+    
+    def multiplication(self):
 
-    # -----------------------------------------------------
-
-    def term(self):
-
-        node = self.factor()
+        node = self.unary()
 
         while self.current.type in (
             TokenType.STAR,
@@ -157,14 +242,36 @@ class Parser:
             node = BinaryOperation(
                 node,
                 op,
-                self.factor()
+                self.unary()
             )
 
         return node
+    
+    def unary(self):
+
+        if self.current.type in (
+
+            TokenType.NOT,
+            TokenType.MINUS,
+            TokenType.PLUS,
+
+        ):
+
+            op = self.current.value
+
+            self.advance()
+
+            return UnaryOperation(
+                op,
+                self.unary()
+            )
+
+        return self.primary()
+
 
     # -----------------------------------------------------
 
-    def factor(self):
+    def primary(self):
 
         token = self.current
 
