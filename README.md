@@ -23,13 +23,9 @@ The built executable is saved to a `build/` folder next to the source file. For 
 | Command | Description |
 |---------|-------------|
 | `erfan rundev <file.erfan>` | Parse and run the program using the built-in interpreter |
-| `erfan runbuild <file.erfan>` | Compile the program to a standalone `.exe` (requires [PyInstaller](https://pyinstaller.org/)) |
+| `erfan runbuild <file.erfan>` | Compile the program to a standalone `.exe` (no extra tools required) |
 
-Install PyInstaller for `runbuild`:
-
-```bash
-pip install pyinstaller
-```
+`runbuild` embeds your source into a bundled Erfan runtime. End users do **not** need Python or PyInstaller installed.
 
 ## Syntax Overview
 
@@ -339,9 +335,25 @@ erfan-language/
 ├── parser/               # Parser
 ├── erfan_ast/            # AST node definitions
 ├── interpreter/          # Runtime interpreter
-├── compiler/             # Transpiler and exe builder
+├── compiler/             # Exe packer and bundled runtime
+│   └── assets/           # Pre-built erfan_runtime.exe
+├── scripts/              # Maintainer build scripts
 └── installer/            # Windows setup wizard
 ```
+
+## Building from Source (Maintainers)
+
+End users install `setup.exe` and never need Python. Maintainers use these scripts once when preparing a release:
+
+```bash
+# 1. Build the embedded runtime stub (needed for runbuild)
+python scripts/build_runtime.py
+
+# 2. Build erfan.exe and setup.exe
+python scripts/build_erfan.py
+```
+
+PyInstaller is only required on the maintainer machine during release builds, not for end users running `erfan runbuild`.
 
 ## Language Summary
 

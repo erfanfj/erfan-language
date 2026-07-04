@@ -25,7 +25,10 @@ def rundev(filename):
 
 
 def runbuild(filename):
-    tree = parse_file(filename)
+    with open(filename, "r", encoding="utf-8") as handle:
+        source_code = handle.read()
+
+    parse_file(filename)
 
     source_dir = os.path.dirname(os.path.abspath(filename))
     base_name = os.path.splitext(os.path.basename(filename))[0]
@@ -33,7 +36,7 @@ def runbuild(filename):
     output = os.path.join(build_dir, f"{base_name}.exe")
 
     compiler = Compiler()
-    built_path = compiler.compile(tree, output=output)
+    built_path = compiler.compile(source_code, output=output)
 
     print(f"Build saved to: {built_path}")
 
