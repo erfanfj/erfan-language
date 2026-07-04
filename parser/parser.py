@@ -11,7 +11,9 @@ from erfan_ast.nodes import (
     Null,
     BinaryOperation,
     FunctionCall,
-    UnaryOperation
+    UnaryOperation,
+    Block,
+    IfStatement,
 )
 
 
@@ -62,6 +64,69 @@ class Parser:
 
     # -----------------------------------------------------
 
+    def block(self):
+
+        statements = []
+
+        self.eat(TokenType.LBRACE)
+
+        while (
+            self.current.type != TokenType.RBRACE
+            and self.current.type != TokenType.EOF
+        ):
+
+            if self.current.type == TokenType.NEWLINE:
+                self.advance()
+                continue
+
+            statements.append(
+                self.statement()
+            )
+
+            while self.current.type == TokenType.NEWLINE:
+                self.advance()
+
+        self.eat(TokenType.RBRACE)
+
+        return Block(statements)
+
+    def if_statement(self):
+
+        self.eat(TokenType.IF)
+
+        # if condition
+        condition = self.expression()
+
+        # رد کردن خطوط خالی قبل از {
+        while self.current.type == TokenType.NEWLINE:
+            self.advance()
+
+        # بلوک if
+        then_block = self.block()
+
+        # رد کردن خطوط خالی بعد از }
+        while self.current.type == TokenType.NEWLINE:
+            self.advance()
+
+        else_block = None
+
+        # اگر else وجود داشت
+        if self.current.type == TokenType.ELSE:
+
+            self.eat(TokenType.ELSE)
+
+            # رد کردن خطوط خالی بعد از else
+            while self.current.type == TokenType.NEWLINE:
+                self.advance()
+
+            else_block = self.block()
+
+        return IfStatement(
+            condition=condition,
+            then_block=then_block,
+            else_block=else_block
+        )
+
     def statement(self):
 
         if self.current.type == TokenType.IDENTIFIER:
@@ -71,6 +136,9 @@ class Parser:
 
         if self.current.type == TokenType.CHAP:
             return self.function_call()
+
+        if self.current.type == TokenType.IF:
+            return self.if_statement()
 
         raise SyntaxError("Unknown Statement")
 

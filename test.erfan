@@ -1,15 +1,13 @@
-chap(5 == 5)
-chap(5 != 4)
+a <- 10
+b <- 20
 
-chap(5 > 2)
-chap(5 < 2)
+if a < b {
 
-chap(5 >= 5)
-chap(5 <= 10)
+    chap("YES")
 
-chap(true && false)
-chap(true || false)
+}
+else {
 
-chap(!false)
+    chap("NO")
 
-chap(-(5+3))
+}

@@ -76,6 +76,23 @@ class Interpreter:
         raise RuntimeError(
             f"Unknown unary operator {node.operator}"
         )
+    
+    def visit_Block(self, node):
+
+        for statement in node.statements:
+            self.visit(statement)
+
+    def visit_IfStatement(self, node):
+
+        condition = self.visit(node.condition)
+
+        if condition:
+
+            self.visit(node.then_block)
+
+        elif node.else_block is not None:
+
+            self.visit(node.else_block)
 
     def visit_BinaryOperation(self, node):
 

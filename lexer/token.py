@@ -15,6 +15,14 @@ class TokenType(Enum):
     # Literals
     # --------------------------
 
+    # Keywords
+    IF = auto()
+    ELSE = auto()
+
+    # Symbols
+    LBRACE = auto()   # {
+    RBRACE = auto()   # }
+
     NUMBER = auto()
     FLOAT = auto()
     STRING = auto()

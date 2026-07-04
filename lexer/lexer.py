@@ -15,14 +15,19 @@ SINGLE_CHAR_TOKENS = {
     ">": TokenType.GT,
     "<": TokenType.LT,
 
-    "!": TokenType.NOT,   # ← این باید وجود داشته باشد
+    "!": TokenType.NOT,   
+    "{": TokenType.LBRACE,
+    "}": TokenType.RBRACE,
 }
 
 DOUBLE_CHAR_TOKENS = {
+    "<-": TokenType.ASSIGN,
+
     "==": TokenType.EQ,
     "!=": TokenType.NE,
     ">=": TokenType.GTE,
     "<=": TokenType.LTE,
+
     "&&": TokenType.AND,
     "||": TokenType.OR,
 }

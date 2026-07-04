@@ -86,3 +86,19 @@ class UnaryOperation(ASTNode):
 class FunctionCall(ASTNode):
     name: str
     arguments: list
+
+
+@dataclass
+class Block(ASTNode):
+    statements: list
+
+
+# -----------------------------
+# If Statement
+# -----------------------------
+
+@dataclass
+class IfStatement(ASTNode):
+    condition: ASTNode
+    then_block: Block
+    else_block: Block | None = None
