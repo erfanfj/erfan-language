@@ -96,3 +96,21 @@ class Interpreter:
         raise Exception(
             f"Unknown function '{node.name}'"
         )
+    def visit_String(self, node):
+
+        return node.value
+
+
+    def visit_Float(self, node):
+
+        return node.value
+
+
+    def visit_Boolean(self, node):
+
+        return node.value
+
+
+    def visit_Null(self, node):
+
+        return None

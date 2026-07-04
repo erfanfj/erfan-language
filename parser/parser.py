@@ -5,6 +5,10 @@ from erfan_ast.nodes import (
     Assignment,
     Identifier,
     Number,
+    Float,
+    String,
+    Boolean,
+    Null,
     BinaryOperation,
     FunctionCall,
 )
@@ -98,16 +102,19 @@ class Parser:
 
         args = []
 
-        args.append(
-            self.expression()
-        )
+        if self.current.type != TokenType.RPAREN:
+
+            args.append(self.expression())
+
+            while self.current.type == TokenType.COMMA:
+
+                self.eat(TokenType.COMMA)
+
+                args.append(self.expression())
 
         self.eat(TokenType.RPAREN)
 
-        return FunctionCall(
-            func,
-            args
-        )
+        return FunctionCall(func, args)
 
     # -----------------------------------------------------
 
@@ -167,6 +174,36 @@ class Parser:
 
             return Number(token.value)
 
+        if token.type == TokenType.FLOAT:
+
+            self.advance()
+
+            return Float(token.value)
+
+        if token.type == TokenType.STRING:
+
+            self.advance()
+
+            return String(token.value)
+
+        if token.type == TokenType.TRUE:
+
+            self.advance()
+
+            return Boolean(True)
+
+        if token.type == TokenType.FALSE:
+
+            self.advance()
+
+            return Boolean(False)
+
+        if token.type == TokenType.NULL:
+
+            self.advance()
+
+            return Null()
+
         if token.type == TokenType.IDENTIFIER:
 
             self.advance()
@@ -183,4 +220,6 @@ class Parser:
 
             return node
 
-        raise SyntaxError("Invalid Expression")
+        raise SyntaxError(
+            f"Unexpected token {token.type.name}"
+    )

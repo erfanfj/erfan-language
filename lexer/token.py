@@ -3,41 +3,85 @@ from dataclasses import dataclass
 
 
 class TokenType(Enum):
+
+    # --------------------------
     # Special
+    # --------------------------
+
     EOF = auto()
     NEWLINE = auto()
 
+    # --------------------------
     # Literals
+    # --------------------------
+
     NUMBER = auto()
+    FLOAT = auto()
+    STRING = auto()
+
     IDENTIFIER = auto()
 
+    TRUE = auto()
+    FALSE = auto()
+    NULL = auto()
+
+    # --------------------------
     # Operators
-    ASSIGN = auto()      # <-
-    PLUS = auto()        # +
-    MINUS = auto()       # -
-    STAR = auto()        # *
-    SLASH = auto()       # /
+    # --------------------------
 
+    ASSIGN = auto()
+
+    PLUS = auto()
+    MINUS = auto()
+    STAR = auto()
+    SLASH = auto()
+
+    # --------------------------
+    # Comparison
+    # --------------------------
+
+    EQ = auto()
+    NE = auto()
+
+    GT = auto()
+    LT = auto()
+
+    GTE = auto()
+    LTE = auto()
+
+    # --------------------------
+    # Logic
+    # --------------------------
+
+    AND = auto()
+    OR = auto()
+    NOT = auto()
+
+    # --------------------------
     # Symbols
-    LPAREN = auto()      # (
-    RPAREN = auto()      # )
+    # --------------------------
 
-    # Built-in Keywords
+    LPAREN = auto()
+    RPAREN = auto()
+
+    COMMA = auto()
+
+    # --------------------------
+    # Builtin
+    # --------------------------
+
     CHAP = auto()
 
 
 @dataclass
 class Token:
+
     type: TokenType
-    value: any
+    value: object
+
     line: int
     column: int
 
     def __repr__(self):
-        return (
-            f"Token("
-            f"{self.type.name}, "
-            f"{self.value}, "
-            f"line={self.line}, "
-            f"column={self.column})"
-        )
+
+        return f"Token({self.type.name}, {self.value}, line={self.line}, column={self.column})"

@@ -27,6 +27,34 @@ class Lexer:
             self.current_char = None
         else:
             self.current_char = self.text[self.pos]
+    def string(self):
+
+        start = self.column
+
+        self.advance()
+
+        value = ""
+
+        while self.current_char is not None and self.current_char != '"':
+
+            value += self.current_char
+
+            self.advance()
+
+        if self.current_char != '"':
+
+            raise SyntaxError(
+                f"Unterminated string at line {self.line}"
+            )
+
+        self.advance()
+
+        return Token(
+            TokenType.STRING,
+            value,
+            self.line,
+            start
+        )
 
     def peek(self):
 
@@ -46,9 +74,42 @@ class Lexer:
 
         value = ""
 
-        while self.current_char is not None and self.current_char.isdigit():
-            value += self.current_char
-            self.advance()
+        dot = False
+
+        while self.current_char is not None:
+
+            if self.current_char.isdigit():
+
+                value += self.current_char
+
+                self.advance()
+
+                continue
+
+            if self.current_char == ".":
+
+                if dot:
+
+                    break
+
+                dot = True
+
+                value += "."
+
+                self.advance()
+
+                continue
+
+            break
+
+        if dot:
+
+            return Token(
+                TokenType.FLOAT,
+                float(value),
+                self.line,
+                start
+            )
 
         return Token(
             TokenType.NUMBER,
@@ -56,11 +117,16 @@ class Lexer:
             self.line,
             start
         )
+    
+    def skip_comment(self):
+
+        while self.current_char is not None and self.current_char != "\n":
+
+            self.advance()
 
     def identifier(self):
 
         start = self.column
-
         value = ""
 
         while (
@@ -73,10 +139,7 @@ class Lexer:
             value += self.current_char
             self.advance()
 
-        token_type = KEYWORDS.get(
-            value,
-            TokenType.IDENTIFIER
-        )
+        token_type = KEYWORDS.get(value, TokenType.IDENTIFIER)
 
         return Token(
             token_type,
@@ -164,6 +227,12 @@ class Lexer:
                 self.advance()
                 continue
 
+            if self.current_char == "/" and self.peek() == "/":
+
+                self.skip_comment()
+
+                continue
+
             if self.current_char == "/":
                 tokens.append(
                     Token(
@@ -174,6 +243,12 @@ class Lexer:
                     )
                 )
                 self.advance()
+                continue
+
+            if self.current_char == '"':
+
+                tokens.append(self.string())
+
                 continue
 
             if self.current_char == "(":
@@ -198,6 +273,22 @@ class Lexer:
                     )
                 )
                 self.advance()
+                continue
+
+            if self.current_char == ",":
+
+                tokens.append(
+
+                    Token(
+                        TokenType.COMMA,
+                        ",",
+                        self.line,
+                        self.column
+                    )
+                )
+
+                self.advance()
+
                 continue
 
             raise SyntaxError(

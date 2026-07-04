@@ -1,4 +1,11 @@
-a <- 50
-b <- 70
-z <- a+b
-chap(z)
+name <- "Erfan"
+
+age <- 22
+
+pi <- 3.14
+
+alive <- true
+
+nothing <- null
+
+chap(name, age, pi, alive, nothing)

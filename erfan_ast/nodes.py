@@ -1,31 +1,31 @@
-from dataclasses import dataclass, field
-from typing import List, Any
+from dataclasses import dataclass
 
-
-# ==========================================================
-# Base Node
-# ==========================================================
 
 class ASTNode:
     pass
 
 
-# ==========================================================
+# ------------------------
 # Program
-# ==========================================================
+# ------------------------
 
 @dataclass
 class Program(ASTNode):
-    statements: List[ASTNode] = field(default_factory=list)
+    statements: list
 
 
-# ==========================================================
+# ------------------------
 # Literals
-# ==========================================================
+# ------------------------
 
 @dataclass
 class Number(ASTNode):
     value: int
+
+
+@dataclass
+class Float(ASTNode):
+    value: float
 
 
 @dataclass
@@ -38,18 +38,33 @@ class Boolean(ASTNode):
     value: bool
 
 
-# ==========================================================
+@dataclass
+class Null(ASTNode):
+    pass
+
+
+# ------------------------
 # Identifier
-# ==========================================================
+# ------------------------
 
 @dataclass
 class Identifier(ASTNode):
     name: str
 
 
-# ==========================================================
-# Expressions
-# ==========================================================
+# ------------------------
+# Assignment
+# ------------------------
+
+@dataclass
+class Assignment(ASTNode):
+    target: Identifier
+    value: ASTNode
+
+
+# ------------------------
+# Binary Operation
+# ------------------------
 
 @dataclass
 class BinaryOperation(ASTNode):
@@ -58,27 +73,11 @@ class BinaryOperation(ASTNode):
     right: ASTNode
 
 
-@dataclass
-class UnaryOperation(ASTNode):
-    operator: str
-    operand: ASTNode
-
-
-# ==========================================================
-# Assignment
-# ==========================================================
-
-@dataclass
-class Assignment(ASTNode):
-    target: Identifier
-    value: ASTNode
-
-
-# ==========================================================
+# ------------------------
 # Function Call
-# ==========================================================
+# ------------------------
 
 @dataclass
 class FunctionCall(ASTNode):
     name: str
-    arguments: List[ASTNode] = field(default_factory=list)
+    arguments: list
