@@ -22,6 +22,11 @@ class TokenType(Enum):
     RETURN = auto()
     CLASS = auto()
     THIS = auto()
+    BORO = auto()
+    ROYE = auto()
+    WHILE = auto()
+    BREAK = auto()
+    CONTINUE = auto()
 
     # Symbols
     LBRACE = auto()   # {
@@ -47,6 +52,7 @@ class TokenType(Enum):
     MINUS = auto()
     STAR = auto()
     SLASH = auto()
+    PERCENT = auto()
 
     # --------------------------
     # Comparison
@@ -78,6 +84,8 @@ class TokenType(Enum):
 
     COMMA = auto()
     DOT = auto()
+    LBRACKET = auto()
+    RBRACKET = auto()
 
     # --------------------------
     # Builtin

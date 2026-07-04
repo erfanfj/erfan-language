@@ -3,6 +3,7 @@ from erfan_ast.nodes import (
     Assignment,
     Identifier,
     MemberAccess,
+    IndexAccess,
 )
 
 from interpreter.environment import Environment
@@ -14,6 +15,14 @@ class ReturnException(Exception):
 
     def __init__(self, value):
         self.value = value
+
+
+class BreakException(Exception):
+    pass
+
+
+class ContinueException(Exception):
+    pass
 
 
 class Interpreter:
@@ -66,6 +75,51 @@ class Interpreter:
 
     # ----------------------------------------
 
+    def visit_ArrayLiteral(self, node):
+
+        return [
+            self.visit(element)
+            for element in node.elements
+        ]
+
+    def visit_IndexAccess(self, node):
+
+        obj = self.visit(node.object)
+        index = self.visit(node.index)
+
+        if not isinstance(index, int):
+            raise TypeError("Array index must be an integer")
+
+        if isinstance(obj, list):
+            if index < 0 or index >= len(obj):
+                raise IndexError(f"Array index {index} out of range")
+            return obj[index]
+
+        if isinstance(obj, str):
+            if index < 0 or index >= len(obj):
+                raise IndexError(f"String index {index} out of range")
+            return obj[index]
+
+        raise TypeError("Index access requires an array or string")
+
+    def set_index(self, target, value):
+
+        obj = self.visit(target.object)
+        index = self.visit(target.index)
+
+        if not isinstance(index, int):
+            raise TypeError("Array index must be an integer")
+
+        if isinstance(obj, list):
+            if index < 0 or index >= len(obj):
+                raise IndexError(f"Array index {index} out of range")
+            obj[index] = value
+            return
+
+        raise TypeError("Index assignment requires an array")
+
+    # ----------------------------------------
+
     def visit_Assignment(self, node):
 
         value = self.visit(node.value)
@@ -81,6 +135,10 @@ class Interpreter:
                 raise RuntimeError("Cannot assign to a member of a non-object value")
 
             obj.fields[node.target.member] = value
+            return
+
+        if isinstance(node.target, IndexAccess):
+            self.set_index(node.target, value)
             return
 
         raise RuntimeError("Invalid assignment target")
@@ -121,6 +179,41 @@ class Interpreter:
 
             self.visit(node.else_block)
 
+    def visit_ForInStatement(self, node):
+
+        iterable = self.visit(node.iterable)
+
+        if not isinstance(iterable, (list, str)):
+            raise TypeError("for-in loop requires an array or string")
+
+        for item in iterable:
+            self.env.set(node.variable, item)
+
+            try:
+                self.visit(node.body)
+            except ContinueException:
+                continue
+            except BreakException:
+                break
+
+    def visit_WhileStatement(self, node):
+
+        while self.visit(node.condition):
+            try:
+                self.visit(node.body)
+            except ContinueException:
+                continue
+            except BreakException:
+                break
+
+    def visit_BreakStatement(self, node):
+
+        raise BreakException()
+
+    def visit_ContinueStatement(self, node):
+
+        raise ContinueException()
+
     def visit_BinaryOperation(self, node):
 
         left = self.visit(node.left)
@@ -137,6 +230,9 @@ class Interpreter:
 
         if node.operator == "/":
             return left / right
+
+        if node.operator == "%":
+            return left % right
 
         if node.operator == "==":
             return left == right
@@ -305,6 +401,11 @@ class Interpreter:
         if node.name == "chap":
             Builtins.chap(*args)
             return None
+
+        if node.name == "size":
+            if len(args) != 1:
+                raise RuntimeError("size() expects exactly 1 argument")
+            return Builtins.size(args[0])
 
         if node.name in self.classes:
             return self.instantiate(self.classes[node.name], args)

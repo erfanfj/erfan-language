@@ -7,11 +7,14 @@ SINGLE_CHAR_TOKENS = {
     "-": TokenType.MINUS,
     "*": TokenType.STAR,
     "/": TokenType.SLASH,
+    "%": TokenType.PERCENT,
 
     "(": TokenType.LPAREN,
     ")": TokenType.RPAREN,
     ",": TokenType.COMMA,
     ".": TokenType.DOT,
+    "[": TokenType.LBRACKET,
+    "]": TokenType.RBRACKET,
 
     ">": TokenType.GT,
     "<": TokenType.LT,

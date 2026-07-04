@@ -20,6 +20,12 @@ from erfan_ast.nodes import (
     This,
     MemberAccess,
     MethodCall,
+    ArrayLiteral,
+    IndexAccess,
+    ForInStatement,
+    WhileStatement,
+    BreakStatement,
+    ContinueStatement,
 )
 
 
@@ -154,6 +160,38 @@ class Parser:
             else_block=else_block
         )
 
+    def for_in_statement(self):
+
+        self.eat(TokenType.BORO)
+
+        variable = self.current.value
+
+        self.eat(TokenType.IDENTIFIER)
+
+        self.eat(TokenType.ROYE)
+
+        iterable = self.expression()
+
+        while self.current.type == TokenType.NEWLINE:
+            self.advance()
+
+        body = self.block()
+
+        return ForInStatement(variable, iterable, body)
+
+    def while_statement(self):
+
+        self.eat(TokenType.WHILE)
+
+        condition = self.expression()
+
+        while self.current.type == TokenType.NEWLINE:
+            self.advance()
+
+        body = self.block()
+
+        return WhileStatement(condition, body)
+
     def statement(self):
 
         if self.current.type == TokenType.CLASS:
@@ -165,6 +203,20 @@ class Parser:
         if self.current.type == TokenType.RETURN:
             return self.return_statement()
 
+        if self.current.type == TokenType.BORO:
+            return self.for_in_statement()
+
+        if self.current.type == TokenType.WHILE:
+            return self.while_statement()
+
+        if self.current.type == TokenType.BREAK:
+            self.advance()
+            return BreakStatement()
+
+        if self.current.type == TokenType.CONTINUE:
+            self.advance()
+            return ContinueStatement()
+
         if self.current.type == TokenType.IDENTIFIER:
 
             next_type = self.tokens[self.position + 1].type
@@ -175,12 +227,12 @@ class Parser:
             if next_type == TokenType.LPAREN:
                 return self.function_call()
 
-            if next_type == TokenType.DOT:
-                return self.member_statement()
+            if next_type in (TokenType.DOT, TokenType.LBRACKET):
+                return self.postfix_statement()
 
         if self.current.type == TokenType.THIS:
 
-            return self.member_statement()
+            return self.postfix_statement()
 
         if self.current.type == TokenType.CHAP:
             return self.function_call()
@@ -267,7 +319,7 @@ class Parser:
             value
         )
 
-    def member_statement(self):
+    def postfix_statement(self):
 
         node = self.postfix()
 
@@ -282,7 +334,7 @@ class Parser:
         if isinstance(node, (MethodCall, FunctionCall)):
             return node
 
-        raise SyntaxError("Invalid member statement")
+        raise SyntaxError("Invalid statement")
 
     # -----------------------------------------------------
 
@@ -440,6 +492,7 @@ class Parser:
         while self.current.type in (
             TokenType.STAR,
             TokenType.SLASH,
+            TokenType.PERCENT,
         ):
 
             op = self.current.value
@@ -479,25 +532,61 @@ class Parser:
 
         node = self.primary()
 
-        while self.current.type == TokenType.DOT:
+        while True:
 
-            self.advance()
+            if self.current.type == TokenType.DOT:
 
-            member = self.current.value
+                self.advance()
 
-            self.eat(TokenType.IDENTIFIER)
+                member = self.current.value
 
-            if self.current.type == TokenType.LPAREN:
+                self.eat(TokenType.IDENTIFIER)
 
-                args = self.parse_call_args()
+                if self.current.type == TokenType.LPAREN:
 
-                node = MethodCall(node, member, args)
+                    args = self.parse_call_args()
+
+                    node = MethodCall(node, member, args)
+
+                else:
+
+                    node = MemberAccess(node, member)
+
+            elif self.current.type == TokenType.LBRACKET:
+
+                self.advance()
+
+                index = self.expression()
+
+                self.eat(TokenType.RBRACKET)
+
+                node = IndexAccess(node, index)
 
             else:
 
-                node = MemberAccess(node, member)
+                break
 
         return node
+
+    def array_literal(self):
+
+        self.eat(TokenType.LBRACKET)
+
+        elements = []
+
+        if self.current.type != TokenType.RBRACKET:
+
+            elements.append(self.expression())
+
+            while self.current.type == TokenType.COMMA:
+
+                self.eat(TokenType.COMMA)
+
+                elements.append(self.expression())
+
+        self.eat(TokenType.RBRACKET)
+
+        return ArrayLiteral(elements)
 
     # -----------------------------------------------------
 
@@ -560,6 +649,10 @@ class Parser:
             self.advance()
 
             return Identifier(token.value)
+
+        if token.type == TokenType.LBRACKET:
+
+            return self.array_literal()
 
         if token.type == TokenType.LPAREN:
 

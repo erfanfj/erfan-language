@@ -1,0 +1,47 @@
+numbers <- [1, 2, 3, 4, 5]
+
+sum <- 0
+
+boro n roye numbers {
+
+    sum <- sum + n
+
+}
+
+chap(sum)
+
+names <- ["Ali", "Sara", "Erfan"]
+
+boro name roye names {
+
+    chap("Hello", name)
+
+}
+
+word <- "Erfan"
+
+boro ch roye word {
+
+    chap(ch)
+
+}
+
+i <- 0
+
+while i < 3 {
+
+    if i == 1 {
+        i <- i + 1
+        continue
+    }
+
+    chap(i)
+    i <- i + 1
+
+}
+
+chap("size:", size(numbers))
+chap("mod:", 10 % 3)
+
+numbers[0] <- 99
+chap(numbers[0])

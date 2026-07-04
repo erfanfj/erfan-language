@@ -34,17 +34,11 @@ The built executable is saved to a `build/` folder next to the source file. For 
 - Whitespace and blank lines inside blocks are ignored
 - Single-line comments start with `//`
 
-## Data Types
+---
 
-| Type | Example | Description |
-|------|---------|-------------|
-| Integer | `42` | Whole numbers |
-| Float | `3.14` | Decimal numbers |
-| String | `"hello"` | Double-quoted text |
-| Boolean | `true`, `false` | Logical values |
-| Null | `null` | Absence of a value |
+## Language Features
 
-## Variables
+### 1. Variables
 
 Variables are declared and assigned with `<-`:
 
@@ -57,18 +51,34 @@ empty <- null
 
 Variable names may contain letters, digits, and underscores. They must start with a letter or underscore.
 
-## Operators
+---
 
-### Arithmetic
+### 2. Data Types
+
+| Type | Example | Description |
+|------|---------|-------------|
+| Integer | `42` | Whole numbers |
+| Float | `3.14` | Decimal numbers |
+| String | `"hello"` | Double-quoted text |
+| Boolean | `true`, `false` | Logical values |
+| Null | `null` | Absence of a value |
+| Array | `[1, 2, 3]` | Ordered list of values |
+
+---
+
+### 3. Operators
+
+#### Arithmetic
 
 | Operator | Meaning |
 |----------|---------|
-| `+` | Addition |
+| `+` | Addition (also string concatenation) |
 | `-` | Subtraction |
 | `*` | Multiplication |
 | `/` | Division |
+| `%` | Modulo (remainder) |
 
-### Comparison
+#### Comparison
 
 | Operator | Meaning |
 |----------|---------|
@@ -79,7 +89,7 @@ Variable names may contain letters, digits, and underscores. They must start wit
 | `>=` | Greater than or equal |
 | `<=` | Less than or equal |
 
-### Logical
+#### Logical
 
 | Operator | Meaning |
 |----------|---------|
@@ -95,9 +105,37 @@ Parentheses can be used to group expressions:
 result <- (a + b) * 2
 ```
 
-## Control Flow
+---
 
-### If / Else
+### 4. Arrays
+
+Create arrays with square brackets:
+
+```erfan
+numbers <- [1, 2, 3]
+mixed <- [1, "hello", true]
+empty <- []
+```
+
+Access and modify elements by index (zero-based):
+
+```erfan
+chap(numbers[0])
+numbers[1] <- 99
+```
+
+Index access also works on strings:
+
+```erfan
+word <- "Erfan"
+chap(word[0])
+```
+
+---
+
+### 5. Control Flow
+
+#### If / Else
 
 ```erfan
 if a < b {
@@ -112,11 +150,71 @@ else {
 }
 ```
 
-The condition must be an expression. Both the `if` and `else` branches use block syntax with `{ }`. The `else` branch is optional.
+The `else` branch is optional.
 
-## Functions
+#### For-In Loop (`boro` / `roye`)
 
-Functions are defined with the `fn` keyword. Parameters are listed in parentheses, and the body is a block.
+Iterate over arrays or strings:
+
+```erfan
+numbers <- [1, 2, 3]
+
+boro n roye numbers {
+
+    chap(n)
+
+}
+```
+
+```erfan
+boro ch roye "Erfan" {
+
+    chap(ch)
+
+}
+```
+
+`boro x roye y` means "for each `x` in `y`".
+
+#### While Loop
+
+```erfan
+i <- 0
+
+while i < 5 {
+
+    chap(i)
+    i <- i + 1
+
+}
+```
+
+#### Break and Continue
+
+```erfan
+boro n roye [1, 2, 3, 4, 5] {
+
+    if n == 3 {
+        break
+    }
+
+    if n == 2 {
+        continue
+    }
+
+    chap(n)
+
+}
+```
+
+- `break` — exit the current loop immediately
+- `continue` — skip to the next iteration
+
+---
+
+### 6. Functions
+
+Functions are defined with the `fn` keyword:
 
 ```erfan
 fn add(a, b) {
@@ -128,9 +226,7 @@ fn add(a, b) {
 chap(add(3, 4))
 ```
 
-### Return
-
-Use `return` to send a value back from a function:
+#### Return
 
 ```erfan
 fn abs(n) {
@@ -144,11 +240,9 @@ fn abs(n) {
 }
 ```
 
-If a function finishes without hitting a `return` statement, it returns `null`.
+If a function finishes without `return`, it returns `null`.
 
-### Recursion
-
-Functions can call themselves:
+#### Recursion
 
 ```erfan
 fn fact(n) {
@@ -164,23 +258,15 @@ fn fact(n) {
 chap(fact(5))
 ```
 
-### Function Calls
+Functions can be called as statements or inside expressions.
 
-User-defined functions and built-ins can be called as statements or inside expressions:
+---
 
-```erfan
-chap(fact(5))
+### 7. Classes and Objects
 
-x <- add(1, 2)
-```
+Erfan supports object-oriented programming with classes, methods, properties, and `this`.
 
-## Classes and Objects
-
-Erfan supports object-oriented programming with classes, methods, properties, and the `this` keyword.
-
-### Defining a Class
-
-Use the `class` keyword. A class body contains method definitions:
+#### Defining a Class
 
 ```erfan
 class Person {
@@ -197,61 +283,29 @@ class Person {
 }
 ```
 
-### Constructor (`init`)
+#### Constructor (`init`)
 
-The `init` method runs automatically when an object is created. Use `this` to refer to the current instance and store properties:
-
-```erfan
-this.name <- name
-```
-
-### Creating Objects
-
-Instantiate a class by calling it like a function:
+The `init` method runs automatically when an object is created:
 
 ```erfan
 p <- Person("Erfan", 25)
 ```
 
-If a class has no `init` method, it cannot receive arguments.
-
-### Methods
-
-Call methods on an object with dot notation:
+#### Methods and Properties
 
 ```erfan
 p.greet()
-```
-
-Methods can return values and use `return` like regular functions:
-
-```erfan
-fn isAdult() {
-    return this.age >= 18
-}
-
-if p.isAdult() {
-    chap("Adult")
-}
-```
-
-### Properties
-
-Read and write object properties with dot notation:
-
-```erfan
 chap(p.name)
-
 p.age <- 26
 ```
 
-Properties are set on the instance via `this.field <- value` inside methods, or directly from outside the class.
+---
 
-## Built-in Functions
+### 8. Built-in Functions
 
-### `chap`
+#### `chap`
 
-Prints one or more values to standard output, separated by spaces.
+Prints values to standard output (like `print`):
 
 ```erfan
 chap("Hello")
@@ -259,16 +313,27 @@ chap(1, 2, 3)
 chap("result:", x + y)
 ```
 
-`chap` works like `print` in other languages.
+#### `size`
 
-## Comments
+Returns the length of an array or string:
 
-Single-line comments begin with `//`. Everything after `//` on that line is ignored:
+```erfan
+chap(size([1, 2, 3]))
+chap(size("Erfan"))
+```
+
+---
+
+### 9. Comments
+
+Single-line comments begin with `//`:
 
 ```erfan
 // this is a comment
-x <- 10  // inline comment
+x <- 10
 ```
+
+---
 
 ## Complete Examples
 
@@ -279,15 +344,24 @@ a <- 10
 b <- 20
 
 if a < b {
-
     chap("YES")
-
 }
 else {
-
     chap("NO")
-
 }
+```
+
+### Loops and Arrays
+
+```erfan
+numbers <- [1, 2, 3, 4, 5]
+sum <- 0
+
+boro n roye numbers {
+    sum <- sum + n
+}
+
+chap(sum)
 ```
 
 ### Factorial
@@ -311,20 +385,21 @@ chap(fact(5))
 ```erfan
 class Person {
 
-    fn init(name, age) {
+    fn init(name) {
         this.name <- name
-        this.age <- age
     }
 
     fn greet() {
-        chap("Hello, I am", this.name)
+        chap("Hello,", this.name)
     }
 
 }
 
-p <- Person("Erfan", 25)
+p <- Person("Erfan")
 p.greet()
 ```
+
+---
 
 ## Project Structure
 
@@ -343,17 +418,16 @@ erfan-language/
 
 ## Building from Source (Maintainers)
 
-End users install `setup.exe` and never need Python. Maintainers use these scripts once when preparing a release:
+End users install `setup.exe` and never need Python. Maintainers use these scripts when preparing a release:
 
 ```bash
-# 1. Build the embedded runtime stub (needed for runbuild)
 python scripts/build_runtime.py
-
-# 2. Build erfan.exe and setup.exe
 python scripts/build_erfan.py
 ```
 
-PyInstaller is only required on the maintainer machine during release builds, not for end users running `erfan runbuild`.
+PyInstaller is only required on the maintainer machine, not for end users.
+
+---
 
 ## Language Summary
 
@@ -363,10 +437,15 @@ PyInstaller is only required on the maintainer machine during release builds, no
 | Integers and floats | Supported |
 | Strings | Supported |
 | Booleans and null | Supported |
-| Arithmetic operators | Supported |
+| Arrays `[ ]` | Supported |
+| Index access `arr[i]` | Supported |
+| Arithmetic operators (`+`, `-`, `*`, `/`, `%`) | Supported |
 | Comparison operators | Supported |
 | Logical operators | Supported |
 | If / else | Supported |
+| For-in loop (`boro` / `roye`) | Supported |
+| While loop | Supported |
+| Break / continue | Supported |
 | Functions (`fn`) | Supported |
 | Return values | Supported |
 | Recursion | Supported |
@@ -374,6 +453,7 @@ PyInstaller is only required on the maintainer machine during release builds, no
 | Objects and methods | Supported |
 | `this` keyword | Supported |
 | Built-in `chap` | Supported |
+| Built-in `size` | Supported |
 | Comments (`//`) | Supported |
 | Interpreted execution (`rundev`) | Supported |
 | Standalone exe build (`runbuild`) | Supported |

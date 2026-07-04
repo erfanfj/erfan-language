@@ -146,3 +146,41 @@ class MethodCall(ASTNode):
     object: ASTNode
     method: str
     arguments: list
+
+
+# -----------------------------
+# Loops & Collections
+# -----------------------------
+
+@dataclass
+class ArrayLiteral(ASTNode):
+    elements: list
+
+
+@dataclass
+class IndexAccess(ASTNode):
+    object: ASTNode
+    index: ASTNode
+
+
+@dataclass
+class ForInStatement(ASTNode):
+    variable: str
+    iterable: ASTNode
+    body: Block
+
+
+@dataclass
+class WhileStatement(ASTNode):
+    condition: ASTNode
+    body: Block
+
+
+@dataclass
+class BreakStatement(ASTNode):
+    pass
+
+
+@dataclass
+class ContinueStatement(ASTNode):
+    pass
