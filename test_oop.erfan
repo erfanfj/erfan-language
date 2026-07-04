@@ -1,0 +1,26 @@
+class Person {
+
+    fn init(name, age) {
+        this.name <- name
+        this.age <- age
+    }
+
+    fn greet() {
+        chap("Hello, I am", this.name)
+    }
+
+    fn isAdult() {
+        return this.age >= 18
+    }
+
+}
+
+p <- Person("Erfan", 25)
+p.greet()
+
+if p.isAdult() {
+    chap("Adult")
+}
+else {
+    chap("Minor")
+}

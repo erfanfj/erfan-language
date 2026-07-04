@@ -1,8 +1,9 @@
 class Environment:
 
-    def __init__(self):
+    def __init__(self, parent=None):
 
         self.variables = {}
+        self.parent = parent
 
     def set(self, name, value):
 
@@ -10,7 +11,10 @@ class Environment:
 
     def get(self, name):
 
-        if name not in self.variables:
-            raise NameError(f"Variable '{name}' is not defined")
+        if name in self.variables:
+            return self.variables[name]
 
-        return self.variables[name]
+        if self.parent is not None:
+            return self.parent.get(name)
+
+        raise NameError(f"Variable '{name}' is not defined")

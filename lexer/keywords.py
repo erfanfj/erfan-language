@@ -9,4 +9,10 @@ KEYWORDS = {
 
     "if": TokenType.IF,
     "else": TokenType.ELSE,
+
+    "fn": TokenType.FN,
+    "return": TokenType.RETURN,
+
+    "class": TokenType.CLASS,
+    "this": TokenType.THIS,
 }

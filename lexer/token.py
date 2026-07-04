@@ -18,6 +18,10 @@ class TokenType(Enum):
     # Keywords
     IF = auto()
     ELSE = auto()
+    FN = auto()
+    RETURN = auto()
+    CLASS = auto()
+    THIS = auto()
 
     # Symbols
     LBRACE = auto()   # {
@@ -73,6 +77,7 @@ class TokenType(Enum):
     RPAREN = auto()
 
     COMMA = auto()
+    DOT = auto()
 
     # --------------------------
     # Builtin

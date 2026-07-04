@@ -14,6 +14,12 @@ from erfan_ast.nodes import (
     UnaryOperation,
     Block,
     IfStatement,
+    FunctionDef,
+    ReturnStatement,
+    ClassDef,
+    This,
+    MemberAccess,
+    MethodCall,
 )
 
 
@@ -90,32 +96,53 @@ class Parser:
 
         return Block(statements)
 
+    def class_block(self):
+
+        methods = []
+
+        self.eat(TokenType.LBRACE)
+
+        while (
+            self.current.type != TokenType.RBRACE
+            and self.current.type != TokenType.EOF
+        ):
+
+            if self.current.type == TokenType.NEWLINE:
+                self.advance()
+                continue
+
+            if self.current.type != TokenType.FN:
+                raise SyntaxError("Class body may only contain method definitions")
+
+            methods.append(self.function_definition())
+
+            while self.current.type == TokenType.NEWLINE:
+                self.advance()
+
+        self.eat(TokenType.RBRACE)
+
+        return methods
+
     def if_statement(self):
 
         self.eat(TokenType.IF)
 
-        # if condition
         condition = self.expression()
 
-        # رد کردن خطوط خالی قبل از {
         while self.current.type == TokenType.NEWLINE:
             self.advance()
 
-        # بلوک if
         then_block = self.block()
 
-        # رد کردن خطوط خالی بعد از }
         while self.current.type == TokenType.NEWLINE:
             self.advance()
 
         else_block = None
 
-        # اگر else وجود داشت
         if self.current.type == TokenType.ELSE:
 
             self.eat(TokenType.ELSE)
 
-            # رد کردن خطوط خالی بعد از else
             while self.current.type == TokenType.NEWLINE:
                 self.advance()
 
@@ -129,10 +156,31 @@ class Parser:
 
     def statement(self):
 
+        if self.current.type == TokenType.CLASS:
+            return self.class_definition()
+
+        if self.current.type == TokenType.FN:
+            return self.function_definition()
+
+        if self.current.type == TokenType.RETURN:
+            return self.return_statement()
+
         if self.current.type == TokenType.IDENTIFIER:
 
-            if self.tokens[self.position + 1].type == TokenType.ASSIGN:
+            next_type = self.tokens[self.position + 1].type
+
+            if next_type == TokenType.ASSIGN:
                 return self.assignment()
+
+            if next_type == TokenType.LPAREN:
+                return self.function_call()
+
+            if next_type == TokenType.DOT:
+                return self.member_statement()
+
+        if self.current.type == TokenType.THIS:
+
+            return self.member_statement()
 
         if self.current.type == TokenType.CHAP:
             return self.function_call()
@@ -141,6 +189,66 @@ class Parser:
             return self.if_statement()
 
         raise SyntaxError("Unknown Statement")
+
+    # -----------------------------------------------------
+
+    def class_definition(self):
+
+        self.eat(TokenType.CLASS)
+
+        name = self.current.value
+
+        self.eat(TokenType.IDENTIFIER)
+
+        while self.current.type == TokenType.NEWLINE:
+            self.advance()
+
+        methods = self.class_block()
+
+        return ClassDef(name, methods)
+
+    def function_definition(self):
+
+        self.eat(TokenType.FN)
+
+        name = self.current.value
+
+        self.eat(TokenType.IDENTIFIER)
+
+        self.eat(TokenType.LPAREN)
+
+        params = []
+
+        if self.current.type != TokenType.RPAREN:
+
+            params.append(self.current.value)
+
+            self.eat(TokenType.IDENTIFIER)
+
+            while self.current.type == TokenType.COMMA:
+
+                self.eat(TokenType.COMMA)
+
+                params.append(self.current.value)
+
+                self.eat(TokenType.IDENTIFIER)
+
+        self.eat(TokenType.RPAREN)
+
+        while self.current.type == TokenType.NEWLINE:
+            self.advance()
+
+        body = self.block()
+
+        return FunctionDef(name, params, body)
+
+    def return_statement(self):
+
+        self.eat(TokenType.RETURN)
+
+        value = self.expression()
+
+        return ReturnStatement(value)
 
     # -----------------------------------------------------
 
@@ -159,13 +267,45 @@ class Parser:
             value
         )
 
+    def member_statement(self):
+
+        node = self.postfix()
+
+        if self.current.type == TokenType.ASSIGN:
+
+            self.eat(TokenType.ASSIGN)
+
+            value = self.expression()
+
+            return Assignment(node, value)
+
+        if isinstance(node, (MethodCall, FunctionCall)):
+            return node
+
+        raise SyntaxError("Invalid member statement")
+
     # -----------------------------------------------------
 
     def function_call(self):
 
         func = self.current.value
 
-        self.eat(TokenType.CHAP)
+        if self.current.type == TokenType.CHAP:
+            self.eat(TokenType.CHAP)
+        else:
+            self.eat(TokenType.IDENTIFIER)
+
+        args = self.parse_call_args()
+
+        return FunctionCall(func, args)
+
+    def parse_call(self, name):
+
+        args = self.parse_call_args()
+
+        return FunctionCall(name, args)
+
+    def parse_call_args(self):
 
         self.eat(TokenType.LPAREN)
 
@@ -183,13 +323,13 @@ class Parser:
 
         self.eat(TokenType.RPAREN)
 
-        return FunctionCall(func, args)
+        return args
 
     # -----------------------------------------------------
 
     def expression(self):
         return self.logical_or()
-    
+
     def logical_or(self):
 
         node = self.logical_and()
@@ -208,7 +348,6 @@ class Parser:
 
         return node
 
-
     def logical_and(self):
 
         node = self.equality()
@@ -226,7 +365,7 @@ class Parser:
             )
 
         return node
-    
+
     def equality(self):
 
         node = self.comparison()
@@ -247,7 +386,7 @@ class Parser:
             )
 
         return node
-    
+
     def comparison(self):
 
         node = self.addition()
@@ -272,7 +411,7 @@ class Parser:
             )
 
         return node
-    
+
     def addition(self):
 
         node = self.multiplication()
@@ -293,7 +432,7 @@ class Parser:
             )
 
         return node
-    
+
     def multiplication(self):
 
         node = self.unary()
@@ -314,7 +453,7 @@ class Parser:
             )
 
         return node
-    
+
     def unary(self):
 
         if self.current.type in (
@@ -334,8 +473,31 @@ class Parser:
                 self.unary()
             )
 
-        return self.primary()
+        return self.postfix()
 
+    def postfix(self):
+
+        node = self.primary()
+
+        while self.current.type == TokenType.DOT:
+
+            self.advance()
+
+            member = self.current.value
+
+            self.eat(TokenType.IDENTIFIER)
+
+            if self.current.type == TokenType.LPAREN:
+
+                args = self.parse_call_args()
+
+                node = MethodCall(node, member, args)
+
+            else:
+
+                node = MemberAccess(node, member)
+
+        return node
 
     # -----------------------------------------------------
 
@@ -379,7 +541,21 @@ class Parser:
 
             return Null()
 
+        if token.type == TokenType.THIS:
+
+            self.advance()
+
+            return This()
+
         if token.type == TokenType.IDENTIFIER:
+
+            if self.tokens[self.position + 1].type == TokenType.LPAREN:
+
+                name = token.value
+
+                self.advance()
+
+                return self.parse_call(name)
 
             self.advance()
 
@@ -397,4 +573,4 @@ class Parser:
 
         raise SyntaxError(
             f"Unexpected token {token.type.name}"
-    )
+        )

@@ -11,6 +11,7 @@ SINGLE_CHAR_TOKENS = {
     "(": TokenType.LPAREN,
     ")": TokenType.RPAREN,
     ",": TokenType.COMMA,
+    ".": TokenType.DOT,
 
     ">": TokenType.GT,
     "<": TokenType.LT,

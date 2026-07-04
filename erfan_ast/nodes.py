@@ -58,7 +58,7 @@ class Identifier(ASTNode):
 
 @dataclass
 class Assignment(ASTNode):
-    target: Identifier
+    target: ASTNode
     value: ASTNode
 
 
@@ -102,3 +102,47 @@ class IfStatement(ASTNode):
     condition: ASTNode
     then_block: Block
     else_block: Block | None = None
+
+
+# -----------------------------
+# Functions
+# -----------------------------
+
+@dataclass
+class FunctionDef(ASTNode):
+    name: str
+    params: list
+    body: Block
+
+
+@dataclass
+class ReturnStatement(ASTNode):
+    value: ASTNode
+
+
+# -----------------------------
+# Classes / OOP
+# -----------------------------
+
+@dataclass
+class ClassDef(ASTNode):
+    name: str
+    methods: list
+
+
+@dataclass
+class This(ASTNode):
+    pass
+
+
+@dataclass
+class MemberAccess(ASTNode):
+    object: ASTNode
+    member: str
+
+
+@dataclass
+class MethodCall(ASTNode):
+    object: ASTNode
+    method: str
+    arguments: list
